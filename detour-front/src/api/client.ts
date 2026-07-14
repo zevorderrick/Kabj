@@ -14,7 +14,7 @@ import {
 
 // CHANGE THIS to your machine's LAN IP when running on a physical device
 // or Android emulator (10.0.2.2 for Android Studio emulator, localhost for iOS simulator/web).
-export const BASE_URL = "http://192.168.67.128:8080";
+export const BASE_URL = "http://10.55.199.4:8080";
 
 async function handle<T>(res: Response): Promise<T> {
   const text = await res.text();

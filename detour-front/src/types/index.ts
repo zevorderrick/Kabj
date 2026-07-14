@@ -25,11 +25,13 @@ export interface Facility {
   distanceKm?: number;
 }
 
+export type UserRole = "TOURIST" | "GUIDE";
+
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: string; // 'TOURIST' | 'GUIDE' | 'OPERATOR' | 'ADMIN'
+  role: UserRole;
   phoneNumber?: string;
   createdAt?: string;
 }
@@ -72,7 +74,7 @@ export interface RegistrationRequest {
   name: string;
   email: string;
   password: string;
-  role?: string;
+  role?: UserRole;
   phoneNumber?: string;
 }
 
@@ -172,4 +174,78 @@ export interface SubmitIncidentParams {
   region?: string;
   durationSeconds: number;
   audioUri?: string | null;
+}
+
+export type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface GuideProfile {
+  id: number;
+  userId: number;
+  bio: string;
+  specialty: string;
+  languages: string;
+  gtaLicenseNo: string;
+  ghanaCardNumber: string;
+  companyName: string;
+  verificationStatus: VerificationStatus;
+  avgRating?: number;
+  baseRatePerHour?: number;
+  createdAt?: string;
+}
+
+export interface GuideOnboardingRequest {
+  userId: number;
+  bio: string;
+  specialty: string;
+  languages: string;
+  gtaLicenseNo: string;
+  ghanaCardNumber: string;
+  companyName: string;
+}
+
+export interface GuideAvailability {
+  id: number;
+  guideId: number;
+  availableDate: string;
+  startTime: string;
+  endTime: string;
+  isBooked: boolean;
+}
+
+export type PayoutStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+
+export interface GuidePayout {
+  id: number;
+  guideId: number;
+  amount: number;
+  transactionReference?: string;
+  momoNumber: string;
+  payoutStatus: PayoutStatus;
+  processedAt?: string;
+}
+
+export interface GuideEarningsSummary {
+  totalRevenue: number;
+  commissionAmount: number;
+  pendingBalance: number;
+}
+
+export interface SetAvailabilityRequest {
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
+/** Params for guide booking detail — populated from booked availability slots until a dedicated API exists. */
+export interface GuideBookingDetailParams {
+  touristName: string;
+  touristPhone?: string;
+  languagePreference: string;
+  specialRequests?: string;
+  meetupLatitude: number;
+  meetupLongitude: number;
+  meetupLabel: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
 }

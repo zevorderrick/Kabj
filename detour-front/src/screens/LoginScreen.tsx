@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import { useAuth } from "../context/AuthContext";
+import { navigateAfterAuth } from "../navigation/guideRouting";
 import { RootStackParamList } from "../navigation/types";
 import { colors } from "../theme";
 
@@ -25,7 +26,7 @@ export default function LoginScreen({ navigation }: Props) {
     try {
       const user = await api.login({ email, password });
       setUser(user);
-      navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] });
+      await navigateAfterAuth(navigation, user);
     } catch (e: any) {
       Alert.alert("Login failed", e.message || "Could not log in. Check your backend is running.");
     } finally {

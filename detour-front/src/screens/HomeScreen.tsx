@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
 import { MainTabsParamList, RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
 import { Attraction } from "../types";
@@ -126,6 +127,7 @@ function DestinationCard({
 
 export default function HomeScreen({ navigation }: Props) {
   const { user } = useAuth();
+  const { unreadCount } = useNotifications();
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -248,7 +250,7 @@ export default function HomeScreen({ navigation }: Props) {
               onPress={() => navigation.navigate("MainTabs", { screen: "Safety" })}
             >
               <Ionicons name="notifications-outline" size={24} color="#fff" />
-              <View style={styles.notifDot} />
+              {unreadCount > 0 && <View style={styles.notifDot} />}
             </TouchableOpacity>
           </View>
 

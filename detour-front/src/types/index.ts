@@ -236,6 +236,21 @@ export interface SetAvailabilityRequest {
   endTime: string;
 }
 
+// --- Notifications (NotificationController) ---
+// Backend `type` values in use today: INCIDENT_RECEIVED, GUIDE_APPROVED,
+// GUIDE_REJECTED, PAYMENT_SUCCESS, PAYMENT_FAILED. It's a free-form string
+// column, so treat unknown values as generic info.
+export type NotificationType = string;
+
+export interface AppNotification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt?: string;
+}
+
 /** Params for guide booking detail — populated from booked availability slots until a dedicated API exists. */
 export interface GuideBookingDetailParams {
   touristName: string;

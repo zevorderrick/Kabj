@@ -2,6 +2,7 @@ package com.detour.api.payments;
 
 import com.detour.api.bookings.Booking;
 import com.detour.api.bookings.BookingRepository;
+import com.detour.api.notifications.NotificationService;
 import com.detour.api.payments.config.PaymentProperties;
 import com.detour.api.payments.dto.InitiatePaymentRequest;
 import com.detour.api.payments.dto.PaymentResponse;
@@ -9,6 +10,7 @@ import com.detour.api.payments.provider.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
     private final PaymentProperties properties;
     private final SandboxPaymentGateway sandboxGateway;
     private final MtnMomoGateway mtnMomoGateway;
@@ -26,6 +29,7 @@ public class PaymentService {
     public PaymentService(
             PaymentRepository paymentRepository,
             BookingRepository bookingRepository,
+            NotificationService notificationService,
             PaymentProperties properties,
             SandboxPaymentGateway sandboxGateway,
             MtnMomoGateway mtnMomoGateway,
@@ -34,6 +38,7 @@ public class PaymentService {
     ) {
         this.paymentRepository = paymentRepository;
         this.bookingRepository = bookingRepository;
+        this.notificationService = notificationService;
         this.properties = properties;
         this.sandboxGateway = sandboxGateway;
         this.mtnMomoGateway = mtnMomoGateway;
@@ -152,13 +157,30 @@ public class PaymentService {
     }
 
     private void applyStatus(Payment payment, String status) {
+        String previousStatus = payment.getStatus();
         payment.setStatus(status);
-        if (PaymentStatus.SUCCESS.equals(status)) {
+        if (PaymentStatus.SUCCESS.equals(status) && !PaymentStatus.SUCCESS.equals(previousStatus)) {
             Booking booking = payment.getBooking();
             booking.setPaymentStatus("PAID");
             bookingRepository.save(booking);
-        } else if (PaymentStatus.FAILED.equals(status)) {
+
+            String amount = payment.getAmount().setScale(2, RoundingMode.HALF_UP).toPlainString();
+            notificationService.create(
+                    booking.getTourist().getId(),
+                    "PAYMENT_SUCCESS",
+                    "Payment received",
+                    "Your payment of " + payment.getCurrency() + " " + amount + " has been received."
+            );
+        } else if (PaymentStatus.FAILED.equals(status) && !PaymentStatus.FAILED.equals(previousStatus)) {
             payment.setFailureReason("Payment was declined or timed out.");
+
+            Booking booking = payment.getBooking();
+            notificationService.create(
+                    booking.getTourist().getId(),
+                    "PAYMENT_FAILED",
+                    "Payment failed",
+                    "Your payment could not be completed. It was declined or timed out — please try again."
+            );
         }
     }
 

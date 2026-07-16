@@ -1,6 +1,7 @@
 package com.detour.api.guides;
 
 import com.detour.api.guides.dto.*;
+import com.detour.api.notifications.NotificationService;
 import com.detour.api.users.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,17 +24,20 @@ public class GuideService {
     private final GuideAvailabilityRepository guideAvailabilityRepository;
     private final GuidePayoutRepository guidePayoutRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public GuideService(
             GuideProfileRepository guideProfileRepository,
             GuideAvailabilityRepository guideAvailabilityRepository,
             GuidePayoutRepository guidePayoutRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            NotificationService notificationService
     ) {
         this.guideProfileRepository = guideProfileRepository;
         this.guideAvailabilityRepository = guideAvailabilityRepository;
         this.guidePayoutRepository = guidePayoutRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -90,14 +94,32 @@ public class GuideService {
         }
 
         profile.setVerificationStatus(VerificationStatus.APPROVED);
-        return GuideProfileResponse.from(guideProfileRepository.save(profile));
+        GuideProfile saved = guideProfileRepository.save(profile);
+
+        notificationService.create(
+                saved.getUserId(),
+                "GUIDE_APPROVED",
+                "Guide application approved",
+                "Congratulations! Your guide application has been approved. You can now set availability and accept bookings."
+        );
+
+        return GuideProfileResponse.from(saved);
     }
 
     @Transactional
     public GuideProfileResponse rejectGuide(Integer guideId) {
         GuideProfile profile = findGuide(guideId);
         profile.setVerificationStatus(VerificationStatus.REJECTED);
-        return GuideProfileResponse.from(guideProfileRepository.save(profile));
+        GuideProfile saved = guideProfileRepository.save(profile);
+
+        notificationService.create(
+                saved.getUserId(),
+                "GUIDE_REJECTED",
+                "Guide application rejected",
+                "Your guide application was not approved. Please contact support for more information."
+        );
+
+        return GuideProfileResponse.from(saved);
     }
 
     @Transactional(readOnly = true)

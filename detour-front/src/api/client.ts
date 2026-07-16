@@ -1,4 +1,5 @@
 import {
+  AppNotification,
   Attraction,
   Booking,
   BookingRequest,
@@ -182,4 +183,20 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount, momoNumber }),
     }).then((r) => handle<GuidePayout>(r)),
+
+  // --- Notifications (NotificationController) ---
+  getNotifications: (userId: number) =>
+    fetch(`${BASE_URL}/api/notifications/user/${userId}`).then((r) =>
+      handle<AppNotification[]>(r)
+    ),
+
+  getUnreadNotificationCount: (userId: number) =>
+    fetch(`${BASE_URL}/api/notifications/user/${userId}/unread-count`).then((r) =>
+      handle<{ count: number }>(r)
+    ),
+
+  markNotificationRead: (notificationId: number) =>
+    fetch(`${BASE_URL}/api/notifications/${notificationId}/read`, {
+      method: "PATCH",
+    }).then((r) => handle<AppNotification>(r)),
 };

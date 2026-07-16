@@ -1,5 +1,6 @@
 package com.detour.api.safety;
 
+import com.detour.api.notifications.NotificationService;
 import com.detour.api.safety.dto.EmergencyContactRequest;
 import com.detour.api.users.User;
 import com.detour.api.users.UserRepository;
@@ -17,18 +18,21 @@ public class SafetyService {
     private final EmergencyContactRepository contactRepository;
     private final SafetyIncidentRepository incidentRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public SafetyService(SafetyAlertRepository alertRepository,
                          VerifiedGuideRepository guideRepository,
                          EmergencyContactRepository contactRepository,
                          SafetyIncidentRepository incidentRepository,
-                         UserRepository userRepository) {
+                         UserRepository userRepository,
+                         NotificationService notificationService) {
         this.alertRepository = alertRepository;
         this.guideRepository = guideRepository;
         this.contactRepository = contactRepository;
         this.incidentRepository = incidentRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public List<SafetyAlert> getActiveAlerts() {
@@ -106,7 +110,16 @@ public class SafetyService {
         incident.setStatus("FORWARDED");
         incident.setNotes("Location and audio forwarded to local authorities (Ghana Police Service dispatch).");
 
-        return incidentRepository.save(incident);
+        SafetyIncident saved = incidentRepository.save(incident);
+
+        notificationService.create(
+                userId,
+                "INCIDENT_RECEIVED",
+                "Incident report received",
+                "Your incident report has been received and is being reviewed."
+        );
+
+        return saved;
     }
 
     public List<SafetyIncident> getUserIncidents(Integer userId) {

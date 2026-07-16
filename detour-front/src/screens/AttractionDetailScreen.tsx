@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import Button from "../components/Button";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
+import {Image} from "expo-image";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AttractionDetail">;
 
@@ -12,14 +13,32 @@ export default function AttractionDetailScreen({ route, navigation }: Props) {
   const { attraction } = route.params;
 
   return (
-    <View style={styles.container}>
+    /*<View style={styles.container}>
       <View style={styles.imagePlaceholder}>
         <Ionicons name="image-outline" size={40} color={colors.textMuted} />
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={20} color="#fff" />
         </TouchableOpacity>
-      </View>
-
+      </View>*/
+    <View style={styles.container}>
+  <View style={styles.imageContainer}>
+    {attraction.imageUrl ? (
+      <Image
+        source={{ uri: attraction.imageUrl }}
+        style={StyleSheet.absoluteFillObject} // Spans the entire header area
+        contentFit="cover"
+        transition={500}
+      />
+    ) : (
+      // Fallback if there is no image in the database
+      <Ionicons name="image-outline" size={40} color={colors.textMuted} />
+    )}
+    
+    {/* The back button stays floating on top of the image */}
+    <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <Ionicons name="arrow-back" size={20} color="#fff" />
+    </TouchableOpacity>
+  </View>
       <ScrollView style={styles.body} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
         <Text style={styles.title}>{attraction.title}</Text>
         <Text style={styles.location}>
@@ -84,11 +103,20 @@ function InfoItem({ icon, label, value }: { icon: any; label: string; value: str
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  imagePlaceholder: {
+  /*imagePlaceholder: {
     height: 260,
     backgroundColor: "#dcd9cf",
     alignItems: "center",
     justifyContent: "center",
+  },*/
+  // Find your styles and replace 'imagePlaceholder' with this:
+  imageContainer: {
+    height: 260,
+    backgroundColor: "#dcd9cf",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    overflow: "hidden", // ⚠️ Prevents the image from bleeding out of the rounded corners if any
   },
   backBtn: {
     position: "absolute",

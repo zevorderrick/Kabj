@@ -20,11 +20,7 @@ import {
 
 // CHANGE THIS to your machine's LAN IP when running on a physical device
 // or Android emulator (10.0.2.2 for Android Studio emulator, localhost for iOS simulator/web).
-<<<<<<< HEAD
-export const BASE_URL = "http://10.55.199.4:8080";
-=======
-export const BASE_URL = "https://simile-sandstone-essay.ngrok-free.dev";
->>>>>>> 864b7684d913ed7dbba48ba7992dcaf2114b02ef
+export const BASE_URL = "http://10.15.239.4:8080";
 
 async function handle<T>(res: Response): Promise<T> {
   const text = await res.text();
